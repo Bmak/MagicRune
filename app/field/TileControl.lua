@@ -12,6 +12,7 @@ local selectedTiles = nil
 
 local ROW = 4
 local COL = 6
+local TILE_SIZE = nil
 
 function TileControl:new()
 	self.__index = self
@@ -19,7 +20,7 @@ function TileControl:new()
 end
 
 function TileControl:init()
-	print( "INIT TILE CONTROL" )
+	self.TILE_SIZE = 85
 
 	local group = composer.getScene("app.GameScene").view
 	self.mainBox = display.newGroup()
@@ -44,15 +45,22 @@ end
 
 
 function TileControl:onSelectItem(event)
-	print("SEL ID "..event.target.ind.."/"..event.target.column)
+	-- print("SEL ID "..event.target.ind.."/"..event.target.column)
 	if (table.indexOf( self.selectedTiles, event.target) == nil) then
 		table.insert( self.selectedTiles, event.target )
 	end
 end
 
 function TileControl:acceptTiles()
+	local col = 0
+	local id = 0
 	for k,item in pairs(self.selectedTiles) do
-		table.remove( self.tiles[item.column], item.ind )
+		col = item.column
+		-- id = item.ind
+		-- print("del "..col.."/"..id)
+		id = table.indexOf( self.tiles[col], item )
+		table.remove( self.tiles[col], id )
+		-- print("EPT "..table.maxn(self.tiles[col]))
 		item:destroy()
 	end
 	self.selectedTiles = {}
@@ -64,7 +72,34 @@ function TileControl:acceptTiles()
 end
 
 function TileControl:updateGrid()
-	
+	local len = 0
+	local tile = nil
+	local count = 0
+
+	local function onSelect(event)
+   		self:onSelectItem(event)
+   	end
+
+	for k,tiles in pairs(self.tiles) do
+		count = 0
+		for i=1,6 do
+			if (table.maxn(tiles) < i) then
+				tile = Tile:new()
+				tile:init(i,k)
+				table.insert( tiles, tile )
+
+				count = count - 1
+				tile.mainBox.y = count * self.TILE_SIZE
+   				tile.mainBox:addEventListener( "tileSelected", onSelect)
+   				self.columnsCont[k]:insert(tile.mainBox)
+			else
+				tile = tiles[i]
+				tile.ind = i
+			end
+			
+			
+		end
+	end
 end
 
 function TileControl:initBtns()
@@ -101,19 +136,19 @@ function TileControl:initTiles( ... )
    		self:onSelectItem(event)
    	end
    	
-   	for i=0,5 do
+   	for i=1,6 do
    		local column = {}
    		local spr = display.newGroup( )
-   		for j=0,5 do
+   		for j=1,6 do
    			local item = Tile:new()
    			item:init(j,i)
 
-   			item.mainBox.y = j * (85)
+   			item.mainBox.y = (j-1) * self.TILE_SIZE
    			item.mainBox:addEventListener( "tileSelected", onSelect)
 
    			table.insert( column, item )
    			spr:insert(item.mainBox)
-   			spr.x = i * (85)
+   			spr.x = (i-1) * self.TILE_SIZE
    			spr.y = 0
    		end
    		table.insert( self.tiles, column )
