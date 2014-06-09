@@ -66,16 +66,19 @@ function Tile:onTouch(e)
 		self.trState = true
 
 		function tr_end( ... )
-			self.trState = false
+			
 			self:setSelect(true)
-			local selectedEvent = { name="tileSelected", target=self }
-			self.mainBox:dispatchEvent(selectedEvent)
 		end
 		function back( ... )
-			transition.to( self.view, { xScale=self.size, yScale=self.size,transition=easing.outBack, time=300,onComplete=tr_end})
+			transition.to( self.view, { xScale=self.size, yScale=self.size,transition=easing.outBack, time=200,onComplete=tr_end})
 			
 		end
-		transition.to( self.view, { xScale=self.size*1.2, yScale=self.size*1.2, time=300,transition=easing.inOutBack,onComplete=back} )
+		transition.to( self.view, { xScale=self.size*1.2, yScale=self.size*1.2, time=200,transition=easing.inOutBack,onComplete=back} )
+
+		self.trState = false
+		
+		local selectedEvent = { name="tileSelected", target=self }
+		self.mainBox:dispatchEvent(selectedEvent)
 	end
 	return true
 end

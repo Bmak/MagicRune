@@ -37,10 +37,12 @@ function TileControl:init()
 	self:initBtns()
 	self:initTiles()
 	self.grid.x = (display.contentWidth - self.grid.width)/2
-	self.grid.y = display.contentHeight - self.grid.height - 40
-	-- local rect = display.newRect(self.grid.width/2, self.grid.height/2, self.grid.width, self.grid.height)
-	-- rect:setFillColor( 0.5,0.5,0.5,0.5 )
-	-- self.grid:insert( rect )
+	self.grid.y = display.contentHeight - self.TILE_SIZE - 10
+	local mask = graphics.newMask("i/mask.png")
+	self.grid:setMask(mask)
+	--self.grid.isHitTestMasked = false
+	self.grid.maskX = self.grid.x + self.grid.width/2
+	self.grid.maskY = -self.TILE_SIZE-70
 end
 
 
@@ -56,11 +58,8 @@ function TileControl:acceptTiles()
 	local id = 0
 	for k,item in pairs(self.selectedTiles) do
 		col = item.column
-		-- id = item.ind
-		-- print("del "..col.."/"..id)
 		id = table.indexOf( self.tiles[col], item )
 		table.remove( self.tiles[col], id )
-		-- print("EPT "..table.maxn(self.tiles[col]))
 		item:destroy()
 	end
 	self.selectedTiles = {}
@@ -75,6 +74,7 @@ function TileControl:updateGrid()
 	local len = 0
 	local tile = nil
 	local count = 0
+	local goToY = nil
 
 	local function onSelect(event)
    		self:onSelectItem(event)
@@ -88,15 +88,18 @@ function TileControl:updateGrid()
 				tile:init(i,k)
 				table.insert( tiles, tile )
 
-				count = count - 1
-				tile.mainBox.y = count * self.TILE_SIZE
+				count = count + 1
+				tile.mainBox.y = (count+5) * -self.TILE_SIZE
    				tile.mainBox:addEventListener( "tileSelected", onSelect)
    				self.columnsCont[k]:insert(tile.mainBox)
 			else
 				tile = tiles[i]
 				tile.ind = i
 			end
-			
+			goToY = (i-1) * -self.TILE_SIZE
+			if goToY ~= tile.mainBox.y then
+				transition.to( tile.mainBox, {delay=(i-1)*50, y=goToY,transition=easing.inExpo, time=500})
+			end
 			
 		end
 	end
@@ -143,7 +146,7 @@ function TileControl:initTiles( ... )
    			local item = Tile:new()
    			item:init(j,i)
 
-   			item.mainBox.y = (j-1) * self.TILE_SIZE
+   			item.mainBox.y = (j-1) * -self.TILE_SIZE
    			item.mainBox:addEventListener( "tileSelected", onSelect)
 
    			table.insert( column, item )
