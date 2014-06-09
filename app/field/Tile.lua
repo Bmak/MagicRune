@@ -10,13 +10,17 @@ function Tile:new()
 		size = 0.6,
 		trState = nil,
 		selMask = nil,
-		selState = nil
+		selState = nil,
+		ind = nil,
+		column = nil
 	}
 	self.__index = self
   	return setmetatable(params, self)
 end
 
-function Tile:init()
+function Tile:init(index, column)
+	self.ind = index
+	self.column = column
 
 	self.selState = false
 
@@ -24,19 +28,21 @@ function Tile:init()
 	
 	self.id = math.round( 1+math.random( )*5 ) 
 
-	self.view = display.newImage("i/tile/"..self.id..".png")
-	self.view.x = self.view.width/2
-	self.view.y = self.view.height/2
-	self.view.xScale = self.size
-	self.view.yScale = self.size
-
 	self.selMask = display.newImage( "i/asdasd.png")
-	self.selMask.x = self.view.width/2
-	self.selMask.y = self.view.height/2
 	self.selMask.xScale = 0.2
 	self.selMask.yScale = 0.2
+	self.selMask.x = self.selMask.contentWidth/2
+	self.selMask.y = self.selMask.contentHeight/2
 	self.selMask.alpha = 0
 	self.mainBox:insert(self.selMask)
+
+	self.view = display.newImage("i/tile/"..self.id..".png")
+	self.view.xScale = self.size
+	self.view.yScale = self.size
+	self.view.x = self.selMask.contentWidth/2
+	self.view.y = self.selMask.contentHeight/2
+	self.mainBox:insert(self.view)
+	
 
 
 	local function onTouch(event)
@@ -45,7 +51,7 @@ function Tile:init()
 	end
 	self.view:addEventListener( "touch", onTouch )
 
-	self.mainBox:insert(self.view)
+	
 
 	return self
 end
@@ -62,7 +68,8 @@ function Tile:onTouch(e)
 		function tr_end( ... )
 			self.trState = false
 			self:setSelect(true)
-			self.mainBox:dispatchEvent("tileSelected", { object=self })
+			local selectedEvent = { name="tileSelected", target=self }
+			self.mainBox:dispatchEvent(selectedEvent)
 		end
 		function back( ... )
 			transition.to( self.view, { xScale=self.size, yScale=self.size,transition=easing.outBack, time=300,onComplete=tr_end})
@@ -77,8 +84,6 @@ function Tile:setSelect(value)
 	if self.selState == value then return end
 
 	self.selState = value
-
-	print( "SET TRANSITION" )
 
 	local function tileRot( ... )
 		self.selMask.rotation = 0
