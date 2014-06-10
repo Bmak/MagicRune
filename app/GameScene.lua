@@ -5,6 +5,7 @@ local composer = require( "composer" )
 local widget = require("widget")
 local tileControl = require("app.field.TileControl")
 local scene = composer.newScene()
+local hero = require("app.Hero")
 
 
 function scene:create( event )
@@ -14,7 +15,8 @@ function scene:create( event )
 	background.y = display.contentCenterY
 	group:insert( background )
 
-
+	hero:init()
+	group:insert( hero.box )
 
 end
 
@@ -34,8 +36,8 @@ function scene:show( event )
 		-- INSERT code here to make the scene come alive
 		-- e.g. start timers, begin animation, play audio, etc.
 
-		local text = display.newText( "GAME SCENE", display.contentWidth/2, display.contentWidth/2 - 100, native.systemFont, 20 )
-		group:insert(text)
+		-- local text = display.newText( "GAME SCENE", display.contentWidth/2, display.contentWidth/2 - 100, native.systemFont, 20 )
+		-- group:insert(text)
 
 		createField()
 

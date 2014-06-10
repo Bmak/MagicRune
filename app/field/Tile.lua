@@ -1,3 +1,6 @@
+local hero = require("app.Hero")
+local composer = require( "composer" )
+
 local Tile = {
 	
 }
@@ -76,7 +79,7 @@ function Tile:onTouch(e)
 		transition.to( self.view, { xScale=self.size*1.2, yScale=self.size*1.2, time=200,transition=easing.inOutBack,onComplete=back} )
 
 		self.trState = false
-		
+
 		local selectedEvent = { name="tileSelected", target=self }
 		self.mainBox:dispatchEvent(selectedEvent)
 	end
@@ -100,11 +103,38 @@ function Tile:setSelect(value)
 	end
 end
 
+function Tile:getToHero(d)
+	transition.cancel(self.selMask)
+	self.selMask.alpha = 0
+	local dx, dy = self.mainBox:localToContent( 0, 0 )
+	self.mainBox.x = dx
+	self.mainBox.y = dy
+	local appView = composer.getScene("app.GameScene").view
+	appView:insert(self.mainBox)
+
+	local function remove()
+		self:clearData()
+	end
+	local function nextStep()
+		transition.to(self.view, { time=100, xScale=0.1,yScale=0.1,transition=easing.aseInOutBounce, onComplete=remove })
+	end
+
+	dx = hero.box.x + hero.box.width/2 - 100
+	dy = hero.box.y + hero.box.height/2
+	transition.to(self.mainBox, { delay=d*30, time=300, x=dx,y=dy,transition=easing.aseInOutBounce, onComplete=nextStep })
+end
+
 function Tile:destroy()
+	self:getToHero()
+end
+
+function Tile:clearData( ... )
 	self.mainBox:removeSelf()
 	self.view:removeSelf( )
+	self.selMask:removeSelf( )
 	self.mainBox = nil
 	self.view = nil
+	self.selMask = nil
 end
 
 return Tile

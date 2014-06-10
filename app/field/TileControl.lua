@@ -2,6 +2,7 @@ local composer = require( "composer" )
 local Tile = require("app.field.Tile")
 local widget = require("widget")
 
+
 local TileControl = {}
 
 local mainBox = nil
@@ -9,6 +10,7 @@ local grid = nil
 local columnsCont = nil --{{}}
 local tiles = nil --{{}}
 local selectedTiles = nil
+local linesCont = nil
 
 local ROW = 4
 local COL = 6
@@ -38,11 +40,19 @@ function TileControl:init()
 	self:initTiles()
 	self.grid.x = (display.contentWidth - self.grid.width)/2
 	self.grid.y = display.contentHeight - self.TILE_SIZE - 10
+	-- self.grid.anchorX = self.grid.width
+	-- self.grid.anchorY = self.grid.height
 	local mask = graphics.newMask("i/mask.png")
 	self.grid:setMask(mask)
 	--self.grid.isHitTestMasked = false
-	self.grid.maskX = self.grid.x + self.grid.width/2
+	self.grid.maskX = self.grid.width/2
 	self.grid.maskY = -self.TILE_SIZE-70
+
+
+	self.linesCont = display.newGroup( )
+	self.mainBox:insert(self.linesCont)
+
+	group:insert(self.mainBox)
 end
 
 
@@ -50,6 +60,24 @@ function TileControl:onSelectItem(event)
 	-- print("SEL ID "..event.target.ind.."/"..event.target.column)
 	if (table.indexOf( self.selectedTiles, event.target) == nil) then
 		table.insert( self.selectedTiles, event.target )
+		self:setSelectItemToBox(event.target)
+	end
+end
+
+function TileControl:setSelectItemToBox(item)
+	local dot = display.newCircle( 5, 5, 10 )
+	dot:setFillColor(1, 0, 0, 0.6 )
+	dot.x, dot.y = item.selMask:localToContent( 0, 0 )
+	self.linesCont:insert(dot)
+
+	local len = table.maxn(self.selectedTiles)
+	if len > 1 then
+		local prevItem = self.selectedTiles[len-1]
+		local dx,dy = prevItem.selMask:localToContent( 0, 0 )
+		local line = display.newLine(dot.x, dot.y, dx, dy )
+		line:setStrokeColor( 1, 0, 0, 0.6 )
+		line.strokeWidth = 6
+		self.linesCont:insert(line)
 	end
 end
 
@@ -60,14 +88,24 @@ function TileControl:acceptTiles()
 		col = item.column
 		id = table.indexOf( self.tiles[col], item )
 		table.remove( self.tiles[col], id )
-		item:destroy()
+		item:getToHero(k)
 	end
 	self.selectedTiles = {}
 
--- TODO magic effects by selection tiles
-	
-	self:updateGrid()
 
+	local slen = self.linesCont.numChildren
+	for i=0,slen do
+		self.linesCont:remove(slen-i)
+	end
+
+
+-- TODO magic effects by selection tiles
+
+	local function update( ... )
+		self:updateGrid()
+	end
+
+	transition.to(self.grid, {time=500, onComplete=update})
 end
 
 function TileControl:updateGrid()
@@ -105,6 +143,18 @@ function TileControl:updateGrid()
 	end
 end
 
+function TileControl:clearTiles()
+	for k,item in pairs(self.selectedTiles) do
+		item:setSelect(false)
+	end
+	self.selectedTiles = {}
+
+	local slen = self.linesCont.numChildren
+	for i=0,slen do
+		self.linesCont:remove(slen-i)
+	end
+end
+
 function TileControl:initBtns()
 	local function accTiles()
 		self:acceptTiles()
@@ -123,8 +173,28 @@ function TileControl:initBtns()
 	} )
 
 	button.x = display.contentWidth - button.contentWidth - 10
-	button.y = 50
+	button.y = display.contentCenterY - 100
 	self.mainBox:insert( button )
+
+	local function clTiles()
+		self:clearTiles()
+	end
+
+	local clearBtn = widget.newButton( {
+		width = 100,
+		height = 50,
+		label = "clear",
+		labelColor = { default={ 0, 0, 0 }, over={ 0, 0, 0 } },
+		fontSize = 20,
+		emboss = true,
+		defaultFile = "i/start_btn.png",
+			overFile = "i/start_btn.png",
+		onRelease = clTiles
+	} )
+
+	clearBtn.x = button.x
+	clearBtn.y = button.y + clearBtn.contentHeight + 10
+	self.mainBox:insert( clearBtn )
 end
 
 function TileControl:initTiles( ... )
