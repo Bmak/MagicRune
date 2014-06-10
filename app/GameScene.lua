@@ -15,8 +15,7 @@ function scene:create( event )
 	background.y = display.contentCenterY
 	group:insert( background )
 
-	hero:init()
-	group:insert( hero.box )
+
 
 end
 
@@ -38,6 +37,8 @@ function scene:show( event )
 
 		-- local text = display.newText( "GAME SCENE", display.contentWidth/2, display.contentWidth/2 - 100, native.systemFont, 20 )
 		-- group:insert(text)
+		hero:init()
+		group:insert( hero.box )
 
 		createField()
 

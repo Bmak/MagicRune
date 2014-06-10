@@ -36,7 +36,7 @@ function TileControl:init()
 
 	self.mainBox:insert(self.grid)
 
-	self:initBtns()
+	
 	self:initTiles()
 	self.grid.x = (display.contentWidth - self.grid.width)/2
 	self.grid.y = display.contentHeight - self.TILE_SIZE - 10
@@ -51,6 +51,8 @@ function TileControl:init()
 
 	self.linesCont = display.newGroup( )
 	self.mainBox:insert(self.linesCont)
+
+	self:initBtns()
 
 	group:insert(self.mainBox)
 end
@@ -173,7 +175,7 @@ function TileControl:initBtns()
 	} )
 
 	button.x = display.contentWidth - button.contentWidth - 10
-	button.y = display.contentCenterY - 100
+	button.y = self.grid.y - self.grid.height
 	self.mainBox:insert( button )
 
 	local function clTiles()

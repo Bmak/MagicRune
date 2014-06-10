@@ -24,7 +24,6 @@ function scene:create( event )
 end
 
 local function startGame()
-		native.requestExit()
 		composer.gotoScene( "app.GameScene" )
 	end
 
