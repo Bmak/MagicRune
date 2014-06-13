@@ -6,6 +6,7 @@ local widget = require("widget")
 local tileControl = require("app.field.TileControl")
 local scene = composer.newScene()
 local hero = require("app.Hero")
+local enemy = require("app.Enemy")
 
 
 function scene:create( event )
@@ -39,6 +40,10 @@ function scene:show( event )
 		-- group:insert(text)
 		hero:init()
 		group:insert( hero.box )
+
+		enemy:init()
+		enemy.box.x = display.contentWidth - enemy.box.width
+		group:insert( enemy.box )
 
 		createField()
 
