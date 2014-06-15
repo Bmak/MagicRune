@@ -31,8 +31,8 @@ function Enemy:init()
 	self.box:insert(self.view)
 end
 
+
 function Enemy:setDamage(damage)
-	
 	self:setLifes(self.lifes - damage)
 end
 
@@ -45,7 +45,13 @@ function Enemy:setLifes(lifes)
 end
 
 function Enemy:attack(target)
+	transition.cancel(self.view)
 	
+	local function back( ... )
+		transition.to( self.view, { time=300, x=0, onComplete=back} )
+	end
+
+	transition.to( self.view, {delay=350, time=500, x=-200,transition=easing.inExpo, onComplete=back} )
 end
 
 function Enemy:destroy( ... )

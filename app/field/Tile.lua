@@ -1,4 +1,3 @@
-local hero = require("app.Hero")
 local composer = require( "composer" )
 
 local Tile = {
@@ -10,7 +9,7 @@ function Tile:new()
 		mainBox = nil,
 		view = nil,
 		id = nil,
-		size = 0.6,
+		size = 0.5,
 		trState = nil,
 		selMask = nil,
 		selState = nil,
@@ -47,38 +46,48 @@ function Tile:init(index, column)
 	self.mainBox:insert(self.view)
 	
 
-
 	local function onTouch(event)
 		self:onTouch(event)
 		return true
 	end
 	self.view:addEventListener( "touch", onTouch )
 
-	
-
 	return self
 end
 
 function Tile:onTouch(e)
+
+	if e.phase == "ended" or e.phase == "cancelled" then
+		local endSelect = { name="endSelect", target=self }
+		self.mainBox:dispatchEvent(endSelect)
+	end
+
+
 	if self.trState == true then
 		return true
 	end
 
-	if e.phase == "ended" then
+	if self.selState == true then
+		-- return true
+	end
+
+
+	if e.phase == "moved" or e.phase == "began" then
 		
-		self.trState = true
+		-- self.trState = true
 
 		function tr_end( ... )
-			
-			self:setSelect(true)
+			-- self.trState = false
+			-- self:setSelect(true)
+			-- print("SET SELECT")
 		end
 		function back( ... )
-			transition.to( self.view, { xScale=self.size, yScale=self.size,transition=easing.outBack, time=200,onComplete=tr_end})
-			
+			-- transition.to( self.view, { xScale=self.size, yScale=self.size,transition=easing.outBack, time=50,onComplete=tr_end})
 		end
-		transition.to( self.view, { xScale=self.size*1.2, yScale=self.size*1.2, time=200,transition=easing.inOutBack,onComplete=back} )
+		-- transition.to( self.view, { xScale=self.size*1.2, yScale=self.size*1.2, time=50,transition=easing.inOutBack,onComplete=back} )
+		
+		-- print("SET TOUCH")
 
-		self.trState = false
 
 		local selectedEvent = { name="tileSelected", target=self }
 		self.mainBox:dispatchEvent(selectedEvent)
@@ -87,29 +96,30 @@ function Tile:onTouch(e)
 end
 
 function Tile:setSelect(value)
-	if self.selState == value then return end
+	-- if self.selState == value then return end
 
 	self.selState = value
 
 	local function tileRot( ... )
 		self.selMask.rotation = 0
 		transition.to(self.selMask, { rotation=360, time=2000,onComplete=tileRot})
+		-- print("MASK "..self.selMask.alpha)
 	end
 	if value == true then
-		transition.to(self.selMask, { alpha=1, time=300,onComplete=tileRot})
+		transition.to(self.selMask, { alpha=1, time=200,onComplete=tileRot})
 	elseif value == false then
 		transition.cancel(self.selMask)
-		transition.to(self.selMask, { alpha=0, time=300})
+		transition.to(self.selMask, { alpha=0, time=200})
 	end
 end
 
-function Tile:getToHero(d)
+function Tile:getToHero(d,attacker, mode)
 	transition.cancel(self.selMask)
 	self.selMask.alpha = 0
 	local dx, dy = self.mainBox:localToContent( 0, 0 )
 	self.mainBox.x = dx
 	self.mainBox.y = dy
-	local appView = composer.getScene("app.GameScene").view
+	local appView = composer.getScene(mode).view
 	appView:insert(self.mainBox)
 
 	local function remove()
@@ -119,9 +129,11 @@ function Tile:getToHero(d)
 		transition.to(self.view, { time=100, xScale=0.1,yScale=0.1,transition=easing.aseInOutBounce, onComplete=remove })
 	end
 
-	dx = hero.box.x + hero.box.width/2 - 100
-	dy = hero.box.y + hero.box.height/2
+	dx = attacker.box.x + attacker.box.width/2 - 100
+	dy = attacker.box.y + attacker.box.height/2
 	transition.to(self.mainBox, { delay=d*30, time=300, x=dx,y=dy,transition=easing.aseInOutBounce, onComplete=nextStep })
+
+
 end
 
 function Tile:destroy()
@@ -131,6 +143,7 @@ end
 function Tile:clearData( ... )
 	self.mainBox:removeSelf()
 	self.view:removeSelf( )
+	transition.cancel(self.selMask)
 	self.selMask:removeSelf( )
 	self.mainBox = nil
 	self.view = nil

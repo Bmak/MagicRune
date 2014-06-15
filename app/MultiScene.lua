@@ -21,7 +21,7 @@ function scene:create( event )
 end
 
 local function createField()
-	tileControl:init("app.GameScene")
+	tileControl:init("app.MultiScene")
 end
 
 function scene:show( event )

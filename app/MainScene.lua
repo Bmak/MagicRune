@@ -24,8 +24,11 @@ function scene:create( event )
 end
 
 local function startGame()
-		composer.gotoScene( "app.GameScene" )
-	end
+	composer.gotoScene( "app.GameScene" )
+end
+local function startMultiGame( ... )
+	composer.gotoScene( "app.MultiScene" )
+end
 
 function scene:show( event )
 	print( "SHOW GAME SCENE" )
@@ -45,9 +48,9 @@ function scene:show( event )
 		group:insert(text)
 
 		local button = widget.newButton( {
-			width = 100,
+			width = 150,
 			height = 50,
-			label = "start",
+			label = "single game",
 			labelColor = { default={ 0, 0, 0 }, over={ 0, 0, 0 } },
 			fontSize = 20,
 			emboss = true,
@@ -59,6 +62,22 @@ function scene:show( event )
 		button.x = display.contentCenterX
 		button.y = display.contentCenterY - button.contentHeight/2
 		group:insert( button )
+
+		local multiBtn = widget.newButton( {
+			width = 150,
+			height = 50,
+			label = "multi game",
+			labelColor = { default={ 0, 0, 0 }, over={ 0, 0, 0 } },
+			fontSize = 20,
+			emboss = true,
+			defaultFile = "i/start_btn.png",
+   			overFile = "i/start_btn.png",
+			onRelease = startMultiGame
+		} )
+
+		multiBtn.x = display.contentCenterX
+		multiBtn.y = button.y + button.height + 20
+		group:insert( multiBtn )
 	end	
 end
 
