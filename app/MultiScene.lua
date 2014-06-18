@@ -38,14 +38,15 @@ function scene:show( event )
 
 		-- local text = display.newText( "GAME SCENE", display.contentWidth/2, display.contentWidth/2 - 100, native.systemFont, 20 )
 		-- group:insert(text)
-		hero:init()
+		hero:init(composer.heroType)
 		group:insert( hero.box )
 
-		enemy:init()
+		enemy:init(99)
 		enemy.box.x = display.contentWidth - enemy.box.width
 		group:insert( enemy.box )
 
 		createField()
+
 
 	end	
 end

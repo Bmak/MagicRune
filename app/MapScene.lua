@@ -1,52 +1,73 @@
-
-
-
 local composer = require( "composer" )
-local widget = require("widget")
-local tileControl = require("app.field.TileControl")
 local scene = composer.newScene()
-local hero = require("app.Hero")
-local enemy = require("app.Enemy")
-local counter = 0
+
+
+local levels = {}
 
 function scene:create( event )
 	local group = self.view
-	local background = display.newImageRect( "i/bkg.png", display.contentWidth, display.contentHeight )
-  	background.x = display.contentCenterX
-	background.y = display.contentCenterY
-	group:insert( background )
+
+	local bkg = display.newImageRect( "i/bkg.png",display.contentWidth, display.contentHeight )
+	bkg.x = display.contentCenterX
+	bkg.y = display.contentCenterY
+	group:insert(bkg)
+
+	local map = display.newImage( "i/map.png")
+	map.xScale = display.contentWidth/map.width
+	map.yScale = map.xScale
+
+  	map.x = display.contentCenterX
+	map.y = display.contentCenterY
+	group:insert( map )
 
 
 
 end
 
-local function createField()
-	tileControl:init("app.GameScene")
+local function onSelectLevel(event)
+	local btn = event.target
+	function tr_end( ... )
+		composer.gotoScene( composer.gameType )
+	end
+	function back( ... )
+		transition.to( btn, { xScale=1, yScale=1,transition=easing.outBack, time=200,onComplete=tr_end})
+	end
+	transition.to( btn, { xScale=2, yScale=2, time=200,transition=easing.inOutBack,onComplete=back} )
 end
 
-local function onKillEnemy(event)
+function createLevels()
 	local group = scene.view
-	counter = counter + 1
+	
 
+	local p1 = { x=62,y=350 }
+	local p2 = { x=360,y=265 }
+	local p3 = { x=64,y=570 }
+	local p4 = { x=390,y=690 }
+	local points = {}
+	table.insert( points, p1 )
+	table.insert( points, p2 )
+	table.insert( points, p3 )
+	table.insert( points, p4 )
 
-	if counter > 3 then
+	for i=1,4 do
+		local btn = display.newImage("i/mark.png")
+		btn.anchorX = 0.5
+		btn.anchorY = 0.5
+		btn.x = points[i].x
+		btn.y = points[i].y
+		btn:addEventListener( "tap", onSelectLevel )
 
-		local function levelClear( ... )
-			composer.gotoScene("app.MapScene")
-		end
-		timer.performWithDelay( 500, levelClear )
-		return
+		group:insert(btn)
+		table.insert( levels, btn )
+
+		setMove(btn)
 	end
 
+end
 
-
-	enemy.box:removeEventListener( "killEvent", onKillEnemy )
-	enemy:destroy()
-
-	enemy:init(counter)
-	enemy.box.x = display.contentWidth - enemy.box.width
-	enemy.box:addEventListener( "killEvent", onKillEnemy )
-	group:insert( enemy.box )
+function setMove(obj)
+	obj.rotation = 0
+	transition.to(obj, { time=2000,rotation=360,onComplete=setMove,onCompleteParams=obj})
 end
 
 function scene:show( event )
@@ -61,17 +82,9 @@ function scene:show( event )
 		-- INSERT code here to make the scene come alive
 		-- e.g. start timers, begin animation, play audio, etc.
 
-		-- local text = display.newText( "GAME SCENE", display.contentWidth/2, display.contentWidth/2 - 100, native.systemFont, 20 )
-		-- group:insert(text)
-		hero:init(composer.heroType)
-		group:insert( hero.box )
 
-		enemy:init(counter)
-		enemy.box.x = display.contentWidth - enemy.box.width
-		enemy.box:addEventListener( "killEvent", onKillEnemy )
-		group:insert( enemy.box )
+		createLevels()
 
-		createField()
 
 	end	
 end
@@ -97,11 +110,13 @@ end
 
 function scene:destroy( event )
 	local group = self.view
-	
-	tileControl:destroy()
-	enemy:destroy()
-	hero:destroy()
 
+	for k,btn in pairs(levels) do
+		transition.cancel(btn)
+		btn:removeSelf( )
+	end
+	levels = nil
+	
 	group:removeSelf( )
 
 	-- Called prior to the removal of scene's "view" (sceneGroup)

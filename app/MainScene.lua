@@ -24,10 +24,14 @@ function scene:create( event )
 end
 
 local function startGame()
-	composer.gotoScene( "app.GameScene" )
+	-- composer.gotoScene( "app.GameScene" )
+	composer.gameType = "app.GameScene"
+	composer.gotoScene( "app.HeroScene" )
 end
 local function startMultiGame( ... )
-	composer.gotoScene( "app.MultiScene" )
+	-- composer.gotoScene( "app.MultiScene" )
+	composer.gameType = "app.MultiScene"
+	composer.gotoScene( "app.HeroScene" )
 end
 
 function scene:show( event )

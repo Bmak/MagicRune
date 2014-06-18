@@ -1,13 +1,9 @@
-
-
-
 local composer = require( "composer" )
-local widget = require("widget")
-local tileControl = require("app.field.TileControl")
 local scene = composer.newScene()
-local hero = require("app.Hero")
-local enemy = require("app.Enemy")
-local counter = 0
+
+
+local heroes = nil
+
 
 function scene:create( event )
 	local group = self.view
@@ -20,33 +16,42 @@ function scene:create( event )
 
 end
 
-local function createField()
-	tileControl:init("app.GameScene")
+
+local function onSelectHero(event)
+	local hero = event.target
+	composer.heroType = hero.type
+	function tr_end( ... )
+		-- composer.gotoScene( composer.gameType )
+		if composer.gameType == "app.GameScene" then
+			composer.gotoScene("app.MapScene")
+		elseif composer.gameType == "app.MultiScene" then
+			composer.gotoScene( composer.gameType )
+		end
+		
+	end
+	function back( ... )
+		transition.to( hero, { xScale=1, yScale=1,transition=easing.outBack, time=200,onComplete=tr_end})
+	end
+	transition.to( hero, { xScale=1.2, yScale=1.2, time=200,transition=easing.inOutBack,onComplete=back} )
 end
 
-local function onKillEnemy(event)
+local function createHeroes()
 	local group = scene.view
-	counter = counter + 1
+	heroes = {}
 
+	for i=0,1 do
+	 	local hero = display.newImage( "i/hero"..i..".png" )
+	 	hero.type = i
+	 	hero.anchorX = 0.5
+	 	hero.anchorY = 0.5
+	 	hero.x = display.contentWidth/2
+	 	hero.y = 300 + (hero.contentHeight+100) * i
 
-	if counter > 3 then
+	 	group:insert(hero)
+	 	table.insert( heroes, hero )
 
-		local function levelClear( ... )
-			composer.gotoScene("app.MapScene")
-		end
-		timer.performWithDelay( 500, levelClear )
-		return
-	end
-
-
-
-	enemy.box:removeEventListener( "killEvent", onKillEnemy )
-	enemy:destroy()
-
-	enemy:init(counter)
-	enemy.box.x = display.contentWidth - enemy.box.width
-	enemy.box:addEventListener( "killEvent", onKillEnemy )
-	group:insert( enemy.box )
+	 	hero:addEventListener( "tap", onSelectHero )
+	end 
 end
 
 function scene:show( event )
@@ -61,17 +66,11 @@ function scene:show( event )
 		-- INSERT code here to make the scene come alive
 		-- e.g. start timers, begin animation, play audio, etc.
 
-		-- local text = display.newText( "GAME SCENE", display.contentWidth/2, display.contentWidth/2 - 100, native.systemFont, 20 )
-		-- group:insert(text)
-		hero:init(composer.heroType)
-		group:insert( hero.box )
+		local text = display.newText( "SELECT HERO", display.contentWidth/2, 100, native.systemFont, 30 )
+		group:insert(text)
 
-		enemy:init(counter)
-		enemy.box.x = display.contentWidth - enemy.box.width
-		enemy.box:addEventListener( "killEvent", onKillEnemy )
-		group:insert( enemy.box )
+		createHeroes()
 
-		createField()
 
 	end	
 end
@@ -98,10 +97,6 @@ end
 function scene:destroy( event )
 	local group = self.view
 	
-	tileControl:destroy()
-	enemy:destroy()
-	hero:destroy()
-
 	group:removeSelf( )
 
 	-- Called prior to the removal of scene's "view" (sceneGroup)

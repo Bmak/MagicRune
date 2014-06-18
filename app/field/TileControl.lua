@@ -82,6 +82,7 @@ end
 
 function TileControl:onSelectItem(event)
 	-- print("SEL ID "..event.target.ind.."/"..event.target.column)
+
 	if event.target ~= self.lastSelect then
 		if event.target == self.selectedTiles[table.maxn( self.selectedTiles)-1] and event.target.selState == true then
 			self.selectedTiles[table.maxn( self.selectedTiles)]:setSelect(false)
@@ -96,6 +97,8 @@ function TileControl:onSelectItem(event)
 		end
 
 	end
+
+	if hero:getNumMoves() == table.maxn( self.selectedTiles ) then return end
 
 	if self:checkSelect(event.target) == false then
 		return
@@ -165,7 +168,6 @@ function TileControl:showOpponentMove()
 
 			if index == tile.id then
 				table.insert( temp, tile )
-				-- print("WTF "..table.maxn( temp ))
 				if table.maxn( temp ) > table.maxn( pattern ) then
 					pattern = temp
 				end 
@@ -178,11 +180,8 @@ function TileControl:showOpponentMove()
 		end
 
 		if table.maxn( pattern ) >= 2 then
-			print("FIND MOVES")
-
 			self.selectedTiles = pattern
 			for s,op in pairs(self.selectedTiles) do
-				-- print("WTF "..op.ind.."/"..op.column)
 				op:setSelect(true)
 				self:setSelectItemToBox(op)
 
@@ -211,6 +210,8 @@ end
 
 
 function TileControl:acceptTiles(e)
+	local numTiles = table.maxn(self.selectedTiles)
+
 	if table.maxn( self.selectedTiles ) <= 1 then
 		for k,item in pairs(self.selectedTiles) do
 			item:setSelect( false )
@@ -227,31 +228,42 @@ function TileControl:acceptTiles(e)
 		return
 	end
 
+	local function removeLock( ... )
+		self:enablePlayer(true)
+	end
+
 	local function oppMove()
+
+		if enemy.state == "killed" then
+			removeLock()
+			return
+		end
+
 		if self.mode == "app.GameScene" then 
 			self.attacker = enemy
 			self.victim = hero
-			self.attacker:attack(enemy)
-			self.victim:setDamage(5)
-			self:enablePlayer(true)
+			self.attacker:attack(self.victim,self.attacker:getDamage(2+math.round(math.random()*3)))
+			timer.performWithDelay( 1000, removeLock )
+			
 		elseif self.mode == "app.MultiScene" then
 			self:showOpponentMove()
 		end
 	end
+
+
 	if self.selectionMode == true then
 		self:enablePlayer(false)
-
 		transition.to(self.mainBox, { time=1500,onComplete=oppMove})
+		
 		self.attacker = hero
 		self.victim = enemy
 	else
-		self:enablePlayer(true)
+		timer.performWithDelay( 1000, removeLock )
 		self.attacker = enemy
 		self.victim = hero
 	end
 
-	self.attacker:attack(enemy)
-	self.victim:setDamage(5)
+	self.attacker:attack(self.victim,self.attacker:getDamage(numTiles))
 
 	self.selectionMode = false
 
@@ -273,16 +285,11 @@ function TileControl:acceptTiles(e)
 	end
 
 
--- TODO magic effects by selection tiles
-
-	
-
-
 	local function update( ... )
 		self:updateGrid()
 	end
 
-	transition.to(self.grid, {time=200, onComplete=update})
+	timer.performWithDelay( 200, update )
 end
 
 function TileControl:updateGrid()
@@ -420,31 +427,10 @@ function TileControl:initTiles( ... )
    		self.grid:insert(spr)
 
    	end
-
-	-- for i=1,6 do
-	-- 	for j=1,6 do
-	-- 		local item = Tile:new()
-
-	-- 		table.insert( self.tiles, item )
-
-	-- 		item:init()
-	-- 		item.mainBox:addEventListener( "tileSelected", onSelectItem )
-
-
-
-	-- 		item.mainBox.x = offX * (85)
-	-- 		item.mainBox.y = offY * (85)
-
-	-- 		offX = offX + 1
-	-- 		if offX >= 6 then
-	-- 			offY = offY + 1
-	-- 			offX = 0
-	-- 		end
-	-- 		self.grid:insert(item.mainBox)
-	-- 	end
-	-- end
-
 end
 
+function TileControl:destroy( ... )
+	self.mainBox:removeSelf( )
+end
 
 return TileControl
