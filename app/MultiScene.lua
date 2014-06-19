@@ -16,7 +16,20 @@ function scene:create( event )
 	background.y = display.contentCenterY
 	group:insert( background )
 
+	local function onExit( ... )
+		composer.gotoScene( "app.MainScene" )
+	end
 
+	local exitBtn = display.newImage( "i/back.png" )
+	exitBtn.anchorX = 0.5
+	exitBtn.anchorY = 0.5
+	exitBtn.xScale = 0.3
+	exitBtn.yScale = 0.3
+	exitBtn.x = display.contentWidth/2
+	exitBtn.y = exitBtn.contentHeight/2
+	group:insert( exitBtn )
+
+	exitBtn:addEventListener( "tap", onExit )
 
 end
 

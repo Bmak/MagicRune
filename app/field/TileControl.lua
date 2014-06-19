@@ -48,7 +48,11 @@ function TileControl:init(mode)
 
 
     	if event.phase == "ended" or event.phase == "cancelled" and self.selectionMode == true then
-    		self:acceptTiles(event)
+    		if self:checkPatterns() == 1 then
+				self:acceptTiles(event)
+			else 
+				self:clearSelection()
+			end
     	end
 
 		return true
@@ -208,6 +212,21 @@ function TileControl:enablePlayer(value)
 	end
 end
 
+function TileControl:clearSelection()
+	for k,item in pairs(self.selectedTiles) do
+		item:setSelect( false )
+	end
+	self.selectedTiles = {}
+	self.lastSelect = nil
+	self.selectionMode = false
+
+	local slen = self.linesCont.numChildren
+	for i=0,slen do
+		self.linesCont:remove(slen-i)
+	end
+
+	system.vibrate()
+end
 
 function TileControl:acceptTiles(e)
 	local numTiles = table.maxn(self.selectedTiles)
@@ -292,6 +311,41 @@ function TileControl:acceptTiles(e)
 	timer.performWithDelay( 200, update )
 end
 
+function TileControl:checkPatterns( ... )
+	local flag = nil
+
+	-- All is one
+	for k,tile in pairs(self.selectedTiles) do
+		if self.selectedTiles[1].id == tile.id then
+			flag = 1
+		else
+			flag = 0
+			break
+		end
+	end
+
+	if flag == 1 then
+		return flag
+	end
+
+
+	-- All is another
+	-- for k,tile in pairs(self.selectedTiles) do
+	-- 	for s,other in pairs(self.selectedTiles) do
+	-- 		if tile ~= other then
+	-- 			if tile.id ~= other.id then
+	-- 				flag = 1
+	-- 			else
+	-- 				flag = 0
+	-- 				return flag
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
+
+	return flag
+end
+
 function TileControl:updateGrid()
 	local len = 0
 	local tile = nil
@@ -302,7 +356,11 @@ function TileControl:updateGrid()
    		self:onSelectItem(event)
    	end
    	local function onEndSelect(event)
-   		self:acceptTiles(event)
+   		if self:checkPatterns() == 1 then
+			self:acceptTiles(event)
+		else 
+			self:clearSelection()
+		end
    	end
 
 	for k,tiles in pairs(self.tiles) do
@@ -399,7 +457,11 @@ function TileControl:initTiles( ... )
    		self:onSelectItem(event)
    	end
 	local function onEndSelect(event)
-   		self:acceptTiles(event)
+		if self:checkPatterns() == 1 then
+			self:acceptTiles(event)
+		else 
+			self:clearSelection()
+		end
    	end
    	
    	for i=1,6 do

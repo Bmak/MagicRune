@@ -33,9 +33,20 @@ settings = {
 	--[[
 	-- Android permissions
 
+	--this don't working
 	androidPermissions = {
   		"android.permission.INTERNET",
+  		--"android.permission.VIBRATE"
   	},
 
 	]]--
+
+	--this working!!
+	android =
+    {
+        usesPermissions =
+        {
+            "android.permission.VIBRATE",
+        },
+    },
 }

@@ -27,16 +27,18 @@ local function startGame()
 	-- composer.gotoScene( "app.GameScene" )
 	composer.gameType = "app.GameScene"
 	composer.gotoScene( "app.HeroScene" )
+
+	system.vibrate( )
 end
 local function startMultiGame( ... )
 	-- composer.gotoScene( "app.MultiScene" )
 	composer.gameType = "app.MultiScene"
 	composer.gotoScene( "app.HeroScene" )
+
+	system.vibrate( )
 end
 
 function scene:show( event )
-	print( "SHOW GAME SCENE" )
-
 	local group = self.view
 	local phase = event.phase
 	
@@ -48,7 +50,7 @@ function scene:show( event )
 		-- INSERT code here to make the scene come alive
 		-- e.g. start timers, begin animation, play audio, etc.
 
-		local text = display.newText( "TITLE OF GAME", display.contentWidth/2, display.contentWidth/2 - 100, native.systemFont, 20 )
+		local text = display.newText( "MAGIC RUNES", display.contentWidth/2, display.contentWidth/2 - 100, native.systemFont, 20 )
 		group:insert(text)
 
 		local button = widget.newButton( {

@@ -113,6 +113,10 @@ function Tile:setSelect(value)
 	end
 end
 
+function Tile:wrongSelect()
+	-- transition.to(self.view, {time=100,x=self.view.x+5,onComplete=})
+end
+
 function Tile:getToHero(d,attacker, mode)
 	transition.cancel(self.selMask)
 	self.selMask.alpha = 0
@@ -129,7 +133,7 @@ function Tile:getToHero(d,attacker, mode)
 		transition.to(self.view, { time=100, xScale=0.1,yScale=0.1,transition=easing.aseInOutBounce, onComplete=remove })
 	end
 
-	dx = attacker.box.x + attacker.box.width/2 - 100
+	dx = attacker.box.x + attacker.box.width/2 - 50
 	dy = attacker.box.y + attacker.box.height/2
 	transition.to(self.mainBox, { delay=d*30, time=300, x=dx,y=dy,transition=easing.aseInOutBounce, onComplete=nextStep })
 
