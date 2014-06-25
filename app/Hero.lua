@@ -10,7 +10,10 @@ local maxLifes = nil
 local lifes = nil
 local heroType = nil
 
-function Hero:init(type)
+local runeType = nil
+local runeView = nil
+
+function Hero:init(type,rune)
 	heroType = type
 	self.lifes = 100
 	self.maxLifes = self.lifes
@@ -18,6 +21,15 @@ function Hero:init(type)
 	self.box = display.newGroup( )
 
 	self.box.y = 100
+
+	self.runeType = composer.runeType
+	self.runeView = display.newImage("i/tile/"..self.runeType..".png")
+	self.runeView.xScale = 0.5
+	self.runeView.yScale = 0.5
+	self.runeView.x = self.runeView.contentWidth/2
+	self.runeView.y = self.runeView.contentHeight/2
+	self.box:insert(self.runeView)
+
 
 	self.view = display.newImage( "i/hero"..type..".png" )
 	self.view.anchorX = 0

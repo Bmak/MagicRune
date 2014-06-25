@@ -7,7 +7,7 @@
 local composer = require( "composer" )
 local widget = require("widget")
 local scene = composer.newScene()
-
+local music = nil
 
 
 function scene:create( event )
@@ -21,6 +21,17 @@ function scene:create( event )
 	-- 
 	-- INSERT code here to initialize the scene
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
+	local options =
+	{
+	    channel=1,
+	    loops=-1,
+	   
+	    fadein=5000,
+	    
+	}
+	music = audio.loadSound( "s/bkg.mp3")
+	audio.play(music,options)
+	audio.setVolume( 0.5, { channel=1 } )
 end
 
 local function startGame()

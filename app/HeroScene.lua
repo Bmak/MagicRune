@@ -20,6 +20,7 @@ end
 local function onSelectHero(event)
 	local hero = event.target
 	composer.heroType = hero.type
+	composer.runeType = hero.runeType
 	function tr_end( ... )
 		-- composer.gotoScene( composer.gameType )
 		if composer.gameType == "app.GameScene" then
@@ -49,6 +50,14 @@ local function createHeroes()
 
 	 	group:insert(hero)
 	 	table.insert( heroes, hero )
+
+	 	hero.runeType = math.round( 1+math.random( )*5 )
+		local rune = display.newImage("i/tile/"..hero.runeType..".png")
+		rune.xScale = 0.7
+		rune.yScale = 0.7
+		rune.x = hero.x - hero.contentWidth/2 + rune.contentWidth/2
+		rune.y = hero.y - hero.contentHeight/2 + rune.contentHeight/2
+		group:insert(rune)
 
 	 	hero:addEventListener( "tap", onSelectHero )
 	end 
